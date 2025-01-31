@@ -677,7 +677,7 @@ int Protocol2PacketHandler::readTx(PortHandler *port, uint8_t id, uint16_t addre
 int Protocol2PacketHandler::readRx(PortHandler *port, uint8_t id, uint16_t length, uint8_t *data, uint8_t *error)
 {
   int result                  = COMM_TX_FAIL;
-  uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  uint8_t *rxpacket           = (uint8_t *)alloca(RXPACKET_MAX_LEN);
   //(length + 11 + (length/3));  // (length/3): consider stuffing
   
   if (rxpacket == NULL)
@@ -699,8 +699,6 @@ int Protocol2PacketHandler::readRx(PortHandler *port, uint8_t id, uint16_t lengt
     //memcpy(data, &rxpacket[PKT_PARAMETER0+1], length);
   }
 
-  free(rxpacket);
-  //delete[] rxpacket;
   return result;
 }
 
@@ -709,7 +707,7 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
   int result                  = COMM_TX_FAIL;
 
   uint8_t txpacket[14]        = {0};
-  uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
+  uint8_t *rxpacket           = (uint8_t *)alloca(RXPACKET_MAX_LEN);
   //(length + 11 + (length/3));  // (length/3): consider stuffing
 
   if (rxpacket == NULL)
@@ -717,7 +715,6 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
   
   if (id >= BROADCAST_ID)
   {
-    free(rxpacket);
     return COMM_NOT_AVAILABLE;
   }
 
@@ -743,8 +740,6 @@ int Protocol2PacketHandler::readTxRx(PortHandler *port, uint8_t id, uint16_t add
     //memcpy(data, &rxpacket[PKT_PARAMETER0+1], length);
   }
 
-  free(rxpacket);
-  //delete[] rxpacket;
   return result;
 }
 
@@ -816,7 +811,7 @@ int Protocol2PacketHandler::writeTxOnly(PortHandler *port, uint8_t id, uint16_t 
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(length + 12 + (length / 3));
   
   if (txpacket == NULL)
     return result;
@@ -835,8 +830,6 @@ int Protocol2PacketHandler::writeTxOnly(PortHandler *port, uint8_t id, uint16_t 
   result = txPacket(port, txpacket);
   port->is_using_ = false;
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -844,7 +837,7 @@ int Protocol2PacketHandler::writeTxRx(PortHandler *port, uint8_t id, uint16_t ad
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(length + 12 + (length / 3));
   uint8_t rxpacket[11]        = {0};
 
   if (txpacket == NULL)
@@ -863,8 +856,6 @@ int Protocol2PacketHandler::writeTxRx(PortHandler *port, uint8_t id, uint16_t ad
 
   result = txRxPacket(port, txpacket, rxpacket, error);
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -905,7 +896,7 @@ int Protocol2PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(length + 12 + (length / 3));
 
   if (txpacket == NULL)
     return result;
@@ -924,8 +915,6 @@ int Protocol2PacketHandler::regWriteTxOnly(PortHandler *port, uint8_t id, uint16
   result = txPacket(port, txpacket);
   port->is_using_ = false;
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -933,7 +922,7 @@ int Protocol2PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(length + 12 + (length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(length + 12 + (length / 3));
   uint8_t rxpacket[11]        = {0};
 
   if (txpacket == NULL)
@@ -952,8 +941,6 @@ int Protocol2PacketHandler::regWriteTxRx(PortHandler *port, uint8_t id, uint16_t
 
   result = txRxPacket(port, txpacket, rxpacket, error);
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -961,7 +948,7 @@ int Protocol2PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14 + (param_length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(param_length + 14 + (param_length / 3));
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
   if (txpacket == NULL)
@@ -984,7 +971,6 @@ int Protocol2PacketHandler::syncReadTx(PortHandler *port, uint16_t start_address
   if (result == COMM_SUCCESS)
     port->setPacketTimeout((uint16_t)((11 + data_length) * param_length));
 
-  free(txpacket);
   return result;
 }
 
@@ -992,7 +978,7 @@ int Protocol2PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_ad
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 14 + (param_length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(param_length + 14 + (param_length / 3));
   // 14: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST START_ADDR_L START_ADDR_H DATA_LEN_L DATA_LEN_H CRC16_L CRC16_H
 
   if (txpacket == NULL)
@@ -1013,8 +999,6 @@ int Protocol2PacketHandler::syncWriteTxOnly(PortHandler *port, uint16_t start_ad
 
   result = txRxPacket(port, txpacket, 0, 0);
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -1022,7 +1006,7 @@ int Protocol2PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10 + (param_length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(param_length + 10 + (param_length / 3));
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
   if (txpacket == NULL)
@@ -1046,8 +1030,6 @@ int Protocol2PacketHandler::bulkReadTx(PortHandler *port, uint8_t *param, uint16
     port->setPacketTimeout((uint16_t)wait_length);
   }
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
 
@@ -1055,7 +1037,7 @@ int Protocol2PacketHandler::bulkWriteTxOnly(PortHandler *port, uint8_t *param, u
 {
   int result                  = COMM_TX_FAIL;
 
-  uint8_t *txpacket           = (uint8_t *)malloc(param_length + 10 + (param_length / 3));
+  uint8_t *txpacket           = (uint8_t *)alloca(param_length + 10 + (param_length / 3));
   // 10: HEADER0 HEADER1 HEADER2 RESERVED ID LEN_L LEN_H INST CRC16_L CRC16_H
 
   if (txpacket == NULL)
@@ -1072,7 +1054,5 @@ int Protocol2PacketHandler::bulkWriteTxOnly(PortHandler *port, uint8_t *param, u
 
   result = txRxPacket(port, txpacket, 0, 0);
 
-  free(txpacket);
-  //delete[] txpacket;
   return result;
 }
